@@ -1,0 +1,134 @@
+Template for firewall changes
+
+1234282
+
+####HNS MOP BEGIN####
+
+Device(s):
+procsv-lo4-asa-3-pri  + procsv-lo4-asa-3-sec (Cisco ASA inner FW pair)
+procsv-lo4-asa-2-pri + procsv-lo4-asa-2-sec (VPN Terminator)
+procsv-lo6-asa-3-pri  + procsv-lo6-asa-3-sec (Cisco ASA inner FW pair)
+procsv-lo6-asa-2-pri + procsv-lo6-asa-2-sec (VPN Terminator)
+procsv-lo6-fwsm-1-pri + procsv-lo6-fwsm-1-sec (FWSM Utility)
+
+PreCheck:**
+
+########## Execution Steps ##########
+s0 goto procsv-lo4-asa-3-pri
+config t
+
+object-group network web_access
+ network-object host 178.255.67.22
+
+end
+wr mem
+exit
+
+s0 goto procsv-lo4-asa-2-pri
+config t
+
+object-group network web_access
+ network-object host 178.255.67.22
+
+end
+wr mem
+exit
+
+s0 goto procsv-lo6-asa-3-pri
+config t
+
+object-group network web_access
+ network-object host 178.255.67.22
+
+
+end
+wr mem
+exit
+
+s0 goto procsv-lo6-asa-2-pri
+config t
+
+object-group network web_access
+ network-object host 178.255.67.22
+
+
+end
+wr mem
+exit
+
+s0 goto procsv-lo6-fwsm-1-pri
+config t
+
+object-group network web_access
+ network-object host 178.255.67.22
+
+end
+wr mem
+exit
+
+####HNS MOP END####
+
+Validation:**
+
+show run object-group id web_access | i 178.255.67.22
+
+Documentation:
+
+show run object-group id web_access
+
+Communication:**
+    john.elson@basware.com
+
+========== Contingency/Backout Plan ==========
+
+s0 goto procsv-lo4-asa-3-pri
+config t
+
+object-group network web_access
+ no network-object host 178.255.67.22
+
+end
+wr mem
+exit
+
+s0 goto procsv-lo4-asa-2-pri
+config t
+
+object-group network web_access
+ no network-object host 178.255.67.22
+
+end
+wr mem
+exit
+
+s0 goto procsv-lo6-asa-3-pri
+config t
+
+object-group network web_access
+ no network-object host 178.255.67.22
+
+
+end
+wr mem
+exit
+
+s0 goto procsv-lo6-asa-2-pri
+config t
+
+object-group network web_access
+ no network-object host 178.255.67.22
+
+
+end
+wr mem
+exit
+
+s0 goto procsv-lo6-fwsm-1-pri
+config t
+
+object-group network web_access
+ no network-object host 178.255.67.22
+
+end
+wr mem
+exit

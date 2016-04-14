@@ -1,0 +1,76 @@
+Template for firewall changes
+
+1235349
+
+####HNS MOP BEGIN####
+
+Device(s):
+mbta-bo2-asa-1-pri
+mbta-bo2-asa-1-sec
+
+PreCheck:**
+
+mbta-bo2-asa-1# show run object-group id Solarwinds
+object-group network Solarwinds
+ network-object host 131.108.45.60
+ network-object host 131.108.45.61
+mbta-bo2-asa-1# show run object-group id Prod_Web
+object-group network Prod_Web
+ network-object 10.31.40.160 255.255.255.224
+mbta-bo2-asa-1# show run object-group id qRadar
+object-group network qRadar
+ network-object host 131.108.45.81
+ network-object host 131.108.45.83
+mbta-bo2-asa-1# show run object-group id OracleOBI
+object-group network OracleOBI
+ network-object host 10.31.33.52
+ network-object host 10.31.33.54
+ network-object host 10.31.33.56
+mbta-bo2-asa-1# show run object-group id DataWareHouse
+object-group network DataWareHouse
+ network-object host 10.31.33.51
+ network-object host 10.31.33.53
+ network-object host 10.31.33.55
+ network-object host 10.31.92.52
+ network-object host 10.31.92.53
+ network-object host 10.31.92.51
+mbta-bo2-asa-1# show run object-group id OBI_SVC
+object-group service OBI_SVC
+ service-object tcp destination eq 7001 
+ service-object tcp destination eq 9701 
+ service-object tcp destination eq 9703 
+ service-object tcp destination eq 9704 
+ service-object tcp destination eq 7002 
+ service-object tcp destination eq 9500 
+ service-object tcp destination eq 9502 
+ service-object tcp destination eq 9714 
+########## Execution Steps ##########
+s0 goto mbta-bo2-asa-1-pri
+config t
+
+
+access-list ace_in extended permit udp object-group Prod_Web object-group qRadar eq syslog
+
+object-group network Solarwinds
+ network-object host 10.108.46.110
+
+no access-list ace_in extended permit udp 10.31.40.160 255.255.255.224 host 131.108.45.81 eq syslog
+no access-list ace_in extended permit udp 10.31.40.160 255.255.255.224 host 131.108.45.83 eq syslog
+
+end
+wr mem
+exit
+
+####HNS MOP END####
+
+Validation:**
+
+Documentation:
+
+Communication:**
+    kbrugnani@mbta.com
+
+========== Contingency/Backout Plan ==========
+
+
+

@@ -1,0 +1,220 @@
+
+1233574
+
+Devices:
+S613031DC3LB02 - 10.251.17.35 (Active)
+S613031DC3LB01 - 10.251.17.34  (Standby)
+
+PreCheck:**
+  A.   Make a backup of the current Load Balancer configuration.
+          Option 1. Use the Archive tool to make a backup of the config via the GUI
+               System >> Archives
+                    Click "Create"
+                    File Name: 1233574-Pre
+
+########## Execution Steps ##########
+All changes should be made via the GUI
+     - RDP to dc2ops02,na.msmps.net (167.215.232.41)
+     - Launch Internet Explorer
+     - Connect to https://10.251.17.35
+     - At security certificate warning page select "Continue to this website (not recommended)."
+     - Log in using your Unix (ldap) credentials
+     - Confirm that load balancer is still the Active load balancer in the pair (if not, log out and connect to the other LB in the pair).
+     - Select the appropriate partition in the drop-down menu (if applicable)
+
+Partition: MAN613031-SAVVI-RD1
+
+"Please create the following on Partition: MAN613031-SAVVI-RD1. Additional information is located in the Load Balancer Configuration tab
+
+VIP: stage.astc.fritolay2go.com IP: 209.143.253.22 Port: 80
+VIP: stage.astc.fritolay2go.com IP: 209.143.253.22 Port: 443
+
+Pool: stage.astc.fritolay2go.com
+
+Members: 10.136.82.27 Port: 80
+
+Monitors: default_php_monitor applied to Pool: stage.astc.fritolay2go.com
+
+VIP: astc.fritolay2go.com IP: 209.143.252.120  Port: 80
+VIP: astc.fritolay2go.com IP: 209.143.252.120  Port: 443
+
+Pool: astc.fritolay2go.com
+
+Members: 10.136.79.51 Port: 80 and 10.136.79.52 Port: 80
+
+Monitors: default_php_monitor applied to Pool: astc.fritolay2go.com
+
+Please enable for the following for the listed VIPs below:
+
+
+
+VIP: astc.fritolay2go.com_443
+VIP IP: 209.143.252.120
+HTTP Profile: set to http, CHANGE TO: http_Insert-X-Forwarded-For
+iRule: ADD: X-SSL
+
+VIP: astc.fritolay2go.com_80
+VIP IP: 209.143.252.120
+HTTP Profile: set to http, CHANGE TO: http_Insert-X-Forwarded-For
+iRule: ADD: X-SSL
+
+VIP: stage.astc.fritolay2go.com_443
+VIP IP: 209.143.253.22
+HTTP Profile: set to http, CHANGE TO: http_Insert-X-Forwarded-For
+iRule: ADD: X-SSL
+
+VIP: stage.astc.fritolay2go.com_80
+VIP: 209.143.253.22
+HTTP Profile: set to http, CHANGE TO: http_Insert-X-Forwarded-For
+iRule: ADD: X-SSL"	
+	
+
+
+
+Once all changes have been completed, synchronize the configuration to the standby load balancer:
+     Click the "Sync Recommended" link on the top-left of the page
+     Click "Synchronize TO Peer"
+     Click "OK"
+
+Validation:**
+     
+
+Documentation:
+list virtual astc.fritolay2go.com_443
+list virtual astc.fritolay2go.com_80
+list virtual stage.astc.fritolay2go.com_443
+list virtual stage.astc.fritolay2go.com_80
+
+Communication:**
+    betty.tran@centurylink.com; pepsicoacct@centurylink.com
+
+** Indicates there should be a output to Ticketing System with a specific note.
+
+========== Backout Plan ==========
+For minor rollbacks, use the GUI to remove specific elements that were added, or to revert changes that were made.  For major rollbacks, restore using the configuration backup made at the start of maintenance.  If changes have not yet been synced to the standby load balancer you can also revert by syncing from the standby load balancer to the active load balancer.
+
+
+
+
+
+
+root@(S613031DC3LB02)(cfg-sync In Sync)(Active)(/MAN613031-SAVVI-RD1)(tmos.ltm)# list virtual astc.fritolay2go.com_443
+ltm virtual astc.fritolay2go.com_443 {
+    destination 209.143.252.120%1:https
+    ip-protocol tcp
+    mask 255.255.255.255
+    partition MAN613031-SAVVI-RD1
+    persist {
+        /Common/cookie {
+            default yes
+        }
+    }
+    pool astc.fritolay2go.com
+    profiles {
+        /Common/http_Insert-X-Forwarded-For { }
+        /Common/tcp { }
+    }
+    rules {
+        X-SSL
+    }
+    source 0.0.0.0/0
+    vs-index 472
+}
+root@(S613031DC3LB02)(cfg-sync In Sync)(Active)(/MAN613031-SAVVI-RD1)(tmos.ltm)# list virtual astc.fritolay2go.com_80
+ltm virtual astc.fritolay2go.com_80 {
+    destination 209.143.252.120%1:http
+    ip-protocol tcp
+    mask 255.255.255.255
+    partition MAN613031-SAVVI-RD1
+    persist {
+        /Common/cookie {
+            default yes
+        }
+    }
+    pool astc.fritolay2go.com
+    profiles {
+        /Common/http_Insert-X-Forwarded-For { }
+        /Common/tcp { }
+    }
+    rules {
+        X-SSL
+    }
+    source 0.0.0.0/0
+    vs-index 471
+}
+root@(S613031DC3LB02)(cfg-sync In Sync)(Active)(/MAN613031-SAVVI-RD1)(tmos.ltm)# list virtual stage.astc.fritolay2go.com_443
+ltm virtual stage.astc.fritolay2go.com_443 {
+    destination 209.143.253.22%1:https
+    ip-protocol tcp
+    mask 255.255.255.255
+    partition MAN613031-SAVVI-RD1
+    persist {
+        /Common/cookie {
+            default yes
+        }
+    }
+    pool stage.astc.fritolay2go.com
+    profiles {
+        /Common/http_Insert-X-Forwarded-For { }
+        /Common/tcp { }
+    }
+    rules {
+        X-SSL
+    }
+    source 0.0.0.0/0
+    vs-index 470
+}
+root@(S613031DC3LB02)(cfg-sync In Sync)(Active)(/MAN613031-SAVVI-RD1)(tmos.ltm)# list virtual stage.astc.fritolay2go.com_80
+ltm virtual stage.astc.fritolay2go.com_80 {
+    destination 209.143.253.22%1:http
+    ip-protocol tcp
+    mask 255.255.255.255
+    partition MAN613031-SAVVI-RD1
+    persist {
+        /Common/cookie {
+            default yes
+        }
+    }
+    pool stage.astc.fritolay2go.com
+    profiles {
+        /Common/http_Insert-X-Forwarded-For { }
+        /Common/tcp { }
+    }
+    rules {
+        X-SSL
+    }
+    source 0.0.0.0/0
+    vs-index 469
+}
+
+root@(S613031DC3LB02)(cfg-sync In Sync)(Active)(/MAN613031-SAVVI-RD1)(tmos.ltm)# list pool stage.astc.fritolay2go.com
+ltm pool stage.astc.fritolay2go.com {
+    load-balancing-mode least-connections-member
+    members {
+        10.136.82.27:http {
+            address 10.136.82.27
+            session monitor-enabled
+            state up
+        }
+    }
+    monitor /Common/default_php_monitor 
+    partition MAN613031-SAVVI-RD1
+}
+root@(S613031DC3LB02)(cfg-sync In Sync)(Active)(/MAN613031-SAVVI-RD1)(tmos.ltm)# list pool astc.fritolay2go.com
+ltm pool astc.fritolay2go.com {
+    load-balancing-mode least-connections-member
+    members {
+        10.136.79.51:http {
+            address 10.136.79.51
+            session monitor-enabled
+            state up
+        }
+        10.136.79.52:http {
+            address 10.136.79.52
+            session monitor-enabled
+            state up
+        }
+    }
+    monitor /Common/default_php_monitor 
+    partition MAN613031-SAVVI-RD1
+}
